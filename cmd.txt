@@ -1,0 +1,48 @@
+mkdir -p workspace ./data/bundle-data ./data/dot-bundle-data ./data/node_modules ./data/pg-data
+cp containers/rails/Gemfile workspace
+
+docker-compose build --no-cache
+docker-compose run --rm rails rails new . --force --database=postgresql --skip-bundle
+docker-compose run --rm rails bundle install --path vendor/bundle --without production --jobs=4
+mkdir -p workspace/tmp/sockets
+
+# config/environments/development.rb
+config.web_console.whitelisted_ips = '0.0.0.0/0'
+
+# config/puma.rb
+plugin :tmp_restart
+app_root = File.expand_path("../..", __FILE__)
+bind "unix://#{app_root}/tmp/sockets/puma.sock"
+
+# config/database.yml
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see Rails configuration guide
+  # http://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+  username: <%= ENV.fetch('DATABASE_USER') { 'devuser' } %>
+  password: <%= ENV.fetch('DATABASE_PASSWORD') { 'password' } %>
+  host: <%= ENV.fetch('DATABASE_HOST') { 'postgres' } %>
+  port: <%= ENV.fetch('DATABASE_PORT') { 5432 } %>
+
+development:
+  <<: *default
+  database: dev
+
+# config/application.rbのclassの中に記述
+config.time_zone = 'Tokyo'
+config.active_record.default_timezone = :local
+
+docker-compose up -d
+
+
+# コンテナ全削除
+docker rm (docker ps -q -a)
+
+# イメージ全削除
+docker images -aq | xargs docker rmi
+
+# volume全削除
+docker volume rm (docker volume ls -qf dangling=true)
