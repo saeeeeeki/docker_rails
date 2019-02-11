@@ -6,7 +6,7 @@ ENV DOCKERIZE_VERSION v0.6.1
 RUN apt-get update -qq && \
     apt-get install -y curl && \
     apt-get install -y wget && \
-    curl -sL https://deb.nodesource.com/setup_8.x | bash -
+    curl -sL https://deb.nodesource.com/setup_10.x | bash -
 
 RUN apt-get update -qq && \
     apt-get install -y build-essential libpq-dev nodejs unzip \
