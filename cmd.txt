@@ -1,7 +1,8 @@
-mkdir -p workspace ./data/bundle-data ./data/dot-bundle-data ./data/node_modules ./data/pg-data ./tmp/sockets
-cp containers/rails/Gemfile workspace
+mkdir -p ./data/bundle-data ./data/dot-bundle-data ./data/node_modules ./data/pg-data ./tmp/sockets
+cp containers/rails/Gemfile .
 
 docker-compose build --no-cache
+docker-compose run --rm rails bundle install --without production --jobs=4
 docker-compose run --rm rails rails new . --force --skip-bundle --database=postgresql --webpack=react
 docker-compose run --rm rails bundle install --without production --jobs=4
 mkdir -p workspace/tmp/sockets

@@ -32,7 +32,7 @@ services:
   spring:
     <<: *app_base
     ports: []
-    command: bundle exec spring server
+    command: bash -c "dockerize -wait tcp://postgres:5432 -timeout 3m && bundle exec spring server"
     stdin_open: true
     tty: true
     pid: host
